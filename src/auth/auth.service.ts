@@ -25,15 +25,25 @@ export class AuthService {
     return createdUser.save();
   }
 
-  async login(loginUserDto: LoginDto): Promise<string> {
+  async login(loginUserDto: LoginDto): Promise<{ accessToken: string }> {
     const { username, password } = loginUserDto;
     const user = await this.userModel.findOne({ username });
+    const userID = user.id;
     if (user && (await this.validatePassword(password, user.password))) {
-      const payload = { username };
+      const payload = { userID };
       const accessToken = this.jwtService.sign(payload);
-      return accessToken;
+      return { accessToken };
     } else {
       throw new UnauthorizedException('Invalid credentials');
+    }
+  }
+
+  getUserDetails(token: string) {
+    try {
+      const decodedToken = this.jwtService.verify(token);
+      return decodedToken;
+    } catch (error) {
+      throw new Error('Invalid token');
     }
   }
 
