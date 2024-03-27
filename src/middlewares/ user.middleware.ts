@@ -18,8 +18,7 @@ export class UserMiddleware implements NestMiddleware {
   constructor(private jwtService: JwtService) {}
 
   use(req: Request, res: Response, next: NextFunction) {
-    const token = req.headers.authorization;
-
+    const token = req.headers.authorization.split(' ')[1];
     if (token) {
       try {
         const decoded = this.jwtService.verify(token);
@@ -28,7 +27,6 @@ export class UserMiddleware implements NestMiddleware {
         console.error('Error verifying token:', error.message);
       }
     }
-
     next();
   }
 }

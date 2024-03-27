@@ -17,10 +17,8 @@ export class MessageService {
     const createdMessage = new this.messageModel(messageDto);
     const savedMessage = await createdMessage.save();
 
-    // Emit the message to the receiver
-    this.messageGateway.server
-      .to(messageDto.receiver)
-      .emit('receiveMessage', savedMessage);
+    // // Emit the message to the receiver
+    this.messageGateway.server.emit('receiveMessage', savedMessage);
 
     return savedMessage;
   }

@@ -16,21 +16,27 @@ export class AuthService {
   ) {}
 
   async register(userDto: UserRegisterDto): Promise<any> {
-    const { password, ...rest } = userDto;
-    const hashedPassword = await this.hashPassword(password);
-    const createdUser = new this.userModel({
-      ...rest,
-      password: hashedPassword,
-    });
-    return createdUser.save();
+    try {
+      const { password, ...rest } = userDto;
+      const hashedPassword = await this.hashPassword(password);
+      const createdUser = new this.userModel({
+        ...rest,
+        password: hashedPassword,
+      });
+      const newUser = await createdUser.save(); // Save the new user to the database
+      const payload = { username: newUser.username, userId: newUser.id };
+      const accessToken = this.jwtService.sign(payload); // Generate JWT token
+      return { accessToken }; // Return the JWT token
+    } catch (error) {
+      throw new Error('Failed to register user: ' + error.message); // Throw an error if registration fails
+    }
   }
 
   async login(loginUserDto: LoginDto): Promise<{ accessToken: string }> {
     const { username, password } = loginUserDto;
     const user = await this.userModel.findOne({ username });
-    const userID = user.id;
     if (user && (await this.validatePassword(password, user.password))) {
-      const payload = { userID };
+      const payload = { username: user.username, userId: user.id };
       const accessToken = this.jwtService.sign(payload);
       return { accessToken };
     } else {

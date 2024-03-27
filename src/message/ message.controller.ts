@@ -13,7 +13,7 @@ export class MessageController {
   async sendMessage(@Body() messageDto: MessageDto): Promise<Message> {
     return this.messageService.sendMessage(messageDto);
   }
-  // @UseGuards(AuthGuard) // Apply the guard to this route
+  @UseGuards(AuthGuard) // Apply the guard to this route
   @Get(':sender/:receiver')
   async getMessages(
     @Param('sender') sender: string,

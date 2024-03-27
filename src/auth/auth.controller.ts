@@ -1,8 +1,14 @@
-import { Body, Controller, Post, ValidationPipe, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Headers,
+  ValidationPipe,
+  Get,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserRegisterDto } from 'src/dto/user-register.dto';
 import { LoginDto } from 'src/dto/login.dto';
-import { UserTokenDto } from 'src/dto/user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -10,12 +16,7 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() userDto: UserRegisterDto): Promise<any> {
-    try {
-      await this.authService.register(userDto);
-      return { message: 'User registered successfully', success: true };
-    } catch (error) {
-      return { message: error.message, success: false };
-    }
+    return await this.authService.register(userDto);
   }
 
   @Post('login')
@@ -25,9 +26,16 @@ export class AuthController {
     return await this.authService.login(loginUserDto);
   }
 
-  @Post('details')
-  async getUserDetails(@Body() userTokenDto: UserTokenDto) {
-    return this.authService.getUserDetails(userTokenDto.token);
+  @Get('details')
+  async getUserDetails(@Headers('authorization') authorizationHeader: string) {
+    // Extract the token from the authorization header
+    const token = authorizationHeader?.split(' ')[1];
+
+    if (!token) {
+      // Handle case where token is missing
+      throw new Error('Authorization token is missing');
+    }
+    return this.authService.getUserDetails(token);
   }
   @Get('users')
   async findAll(): Promise<{ id: string; username: string }[]> {

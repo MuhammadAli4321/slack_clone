@@ -17,6 +17,8 @@ import { UserMiddleware } from './middlewares/ user.middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(UserMiddleware).forRoutes('*');
+    consumer
+      .apply(UserMiddleware)
+      .forRoutes('auth/users', 'auth/details', 'messages/*');
   }
 }
